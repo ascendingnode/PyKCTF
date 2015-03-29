@@ -105,6 +105,23 @@ cdef class KCTF:
         def __get__(self): return self.thisptr.J21_const
         def __set__(self,double v): self.thisptr.J21_const = v
 
+    # Get the parameter array
+    property y:
+        def __get__(self): return np.array(self.thisptr.y)
+
+    # Get the inner orbit
+    property inner:
+        def __get__(self):
+            y = np.array(self.thisptr.y)
+            G1,G2,e1 = y[0:3],y[3:6],y[6:9]
+            k1 = G1/np.linalg.norm(G1)
+            k2 = G2/np.linalg.norm(G2)
+            i = np.arccos(np.dot(k1,k2))
+            e = np.linalg.norm(e1)
+            bm = self.thisptr.beta1*self.thisptr.beta1*self.thisptr.mu1
+            a = np.dot(G1,G1)/(bm*(1.-(e*e)));
+            return np.array([a*(1-e),e,i])
+
     '''# Evolve system
     def evolve(self, double tgoal, precision=None):
         if tgoal==self.t:
